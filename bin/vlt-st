@@ -1,0 +1,23 @@
+#!/bin/bash
+
+d="."
+if (( $# >= 1 ))
+then
+    d="$1"
+fi
+
+echo "vlt add these:"
+while read l
+do
+    svn info "$d/$l" > /dev/null 2>&1 && echo "$d/$l"
+done < <(vlt st "$d" | grep -e "^?" |cut -d'?' -f2)
+
+echo "vlt rm these:"
+while read l
+do
+    st=$(vlt info "$d/$l" |grep 'Status:' |sed 's/Status: //')
+    if [[ "unknown" != "$st" ]]
+    then
+        echo "$d/$l"
+    fi
+done < <(svn st "$d" | grep -e "^?" |cut -d'?' -f2)

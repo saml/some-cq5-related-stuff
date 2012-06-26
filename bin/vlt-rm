@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if (( $# < 1 ))
+then
+    echo "Usage: $0 stuff"
+    echo "invokes vlt rm and vlt ci"
+    exit 1
+fi
+vlt rm $* && vlt ci $*
+
+#while read l
+#do
+#    st=$(vlt info "$d/$l" |grep 'Status:' |sed 's/Status: //')
+#    if [[ "unknown" != "$st" ]]
+#    then
+#        vlt rm "$d/$l"
+#    fi
+#done < <(svn st "$d" | grep -e "^?" |cut -d'?' -f2)
+#

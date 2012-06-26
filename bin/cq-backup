@@ -1,0 +1,21 @@
+#!/bin/bash
+
+
+if (( $# < 2 ))
+then
+    echo "Usage: $0 base-url target-dir [curl-options]"
+    echo "  CRX backup restoration"
+    echo "example, $0 http://localhost:4502 /tmp/cq-backup -b cq.cookie"
+    exit 1
+fi
+
+base_url="${1%/}"
+target_dir="${2%/}"
+
+
+#/home/sam/opt/cq/crx-quickstart/server/runtime/0/_crx/config/backup.jsp does mkdir
+#mkdir -p "$target_dir"
+
+shift 2
+echo "curl $* $base_url/crx/config/backup.jsp?action=add&zipFileName=&targetDir=$target_dir"
+curl $* "$base_url/crx/config/backup.jsp?action=add&zipFileName=&targetDir=$target_dir"

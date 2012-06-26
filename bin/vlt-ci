@@ -1,0 +1,16 @@
+#!/bin/bash
+
+d="."
+if (( $# >= 1 ))
+then
+    d="$1"
+fi
+
+files=()
+while read l
+do
+    files+=("$d/$l")
+done < <(vlt st "$d" | grep -e "^M" |cut -d' ' -f2)
+
+
+vlt ci "${files[@]}"

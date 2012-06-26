@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if (( $# < 1 ))
+then
+    echo "Usage: $0 stuff"
+    echo "invokes vlt add and vlt ci"
+    exit 1
+fi
+
+vlt add $* && vlt ci $*
+
+#echo "vlt add these:"
+#while read l
+#do
+#    svn info "$d/$l" > /dev/null 2>&1 && vlt add "$d/$l"
+#done < <(vlt st "$d" | grep -e "^?" |cut -d'?' -f2)
+
+

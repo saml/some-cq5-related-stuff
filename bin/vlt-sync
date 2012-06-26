@@ -1,0 +1,132 @@
+#!/bin/bash
+
+function usage() {
+    echo "Synchronizes vlt with svn"
+    echo "Usage: $0 COMMAND directory-to-sync"
+    echo "COMMAND:"
+    echo -e "push2vlt\tremoves/adds files to vlt (from svn)"
+    echo -e "push2svn\tremoves/adds files to svn (from vlt)"
+    echo
+    echo ">>> do not use below <<<"
+    echo -e "init\tinitializes vlt and svn (vlt up && svn up)"
+    echo -e "vlt-rm\tremoves from vlt"
+    echo -e "vlt-add\tadds to vlt"
+    echo -e "svn-rm\tremoves from svn"
+    echo -e "svn-add\tadds to svn"
+}
+function err() {
+    msg="$1"
+    echo "$msg"
+    echo "exiting..."
+    exit 1
+}
+
+if (( $# < 2 ))
+then
+    usage
+    exit 1
+fi
+
+function init() {
+    d="$1"
+
+    #because some machines have /comments
+    rm "$d/.content.xml"
+
+    #download from crx
+    vlt up "$d"
+
+    #download from svn
+    svn up "$d" || err "probably has conflicts..."
+}
+
+function vlt_rm() {
+    d="$1"
+
+    #remove unversioned files from crx
+    while read -r line
+    do
+        vlt rm "$d/$line"
+    done < <(svn st "$d" | grep "^?" | cut -d'?' -f2)
+}
+
+function vlt_add() {
+    d="$1"
+
+    #assume svn is up to date.
+    #add to crx
+    while read -r line
+    do
+        x="$d/$line"
+        #svn info "$x" && vlt add "$x"  #only add that's in svn
+        svn info "$x" > /dev/null 2>&1
+        if (( $? == 0 ))
+        then
+            vlt add "$x"
+        fi
+    done < <(vlt st "$d" | grep "^?" | cut -d'?' -f2)
+}
+
+function svn_rm() {
+    d="$1"
+
+    #remove files not in crx from svn
+    while read -r line
+    do
+        svn rm "$d/$line"
+    done < <(vlt st "$d" | grep "^?" | cut -d'?' -f2)
+}
+
+function svn_add() {
+    d="$1"
+
+    #add to svn
+    while read -r line
+    do
+        svn add "$d/$line"
+    done < <(svn st "$d" | grep "^?" | cut -d'?' -f2)
+}
+
+function push2vlt() {
+    d="$1"
+    init "$d" &&
+    vlt_rm "$d" &&
+    vlt_add "$d"
+}
+
+function push2svn() {
+    d="$1"
+    init "$d" &&
+    svn_rm "$d" &&
+    svn_add "$d"
+}
+
+d="$2"
+
+case "$1" in
+    "init")
+        init "$d"
+        ;;
+    "vlt-add")
+        vlt_add "$d"
+        ;;
+    "svn-add")
+        svn_add "$d"
+        ;;
+    "vlt-rm")
+        vlt_rm "$d"
+        ;;
+    "svn-rm")
+        svn_rm "$d"
+        ;;
+    "push2vlt")
+        push2vlt "$d"
+        ;;
+    "push2svn")
+        push2svn "$d"
+        ;;
+    *)
+        usage
+        exit 1
+        ;;
+esac

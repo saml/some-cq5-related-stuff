@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if (( $# < 2 ))
+then
+    echo "Usage: $0 path-to-invalidate  host1 host2 ..."
+    exit 1
+fi
+
+p="$1"
+shift 1
+for host in "$@"
+do
+    echo "curl -H \"CQ-Handle: $p\" -H \"CQ-Path: $p\" http://$host/dispatcher/invalidate.cache"
+    curl -H "CQ-Handle: $p" -H "CQ-Path: $p" "http://$host/dispatcher/invalidate.cache"
+done
+
+

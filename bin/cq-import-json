@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if (( $# < 1 ))
+then
+    echo "Usage: $0 json url [name-of-node, default=given in the url] [cred, default=admin:admin]"
+    echo "example: $0 /tmp/content.tidy.-1.json http://localhost:4502/content/foo"
+    echo "example: $0 /tmp/content.tidy.-1.json http://localhost:4502/content foo"
+    exit 1
+fi
+
+j="$1"
+url="$2"
+name_parm=""
+if (( $# >= 3 ))
+then
+    name_param="-F:name=$3"
+fi
+cred="${4:-admin:admin}"
+
+
+echo curl -f -u "$cred" -F":operation=import" -F":contentType=json" "$name_param" -F":replace=true" -F":replaceProperties=true" -F":contentFile=@$j" "$url" || exit 1
+curl -f -u "$cred" -F":operation=import" -F":contentType=json" "$name_param" -F":replace=true" -F":replaceProperties=true" -F":contentFile=@$j" "$url" || exit 1
+

@@ -1,0 +1,122 @@
+#!/bin/bash
+
+if (( $# < 1 ))
+then
+    echo "Creates /apps/sandbox/*"
+    echo "Usage: $0 project_name [host] [cred]"
+    echo "ex, $0 test-project localhost:4502 admin:admin"
+    exit 1
+fi
+
+name="$1"
+host="localhost:4502"
+cred="admin:admin"
+
+if (( $# >= 2 ))
+then
+    host="$2"
+fi
+
+if (( $# >= 3 ))
+then
+    cred="$3"
+fi
+
+path="/apps/sandbox/$name"
+left="http://${host}${path}"
+category="sandbox.$name"
+
+function createComponent() {
+curl -s -u "$cred" \
+    -F'jcr:primaryType=cq:Component' \
+    -F"sling:resourceType=$path" \
+    "$left" > /dev/null 2>&1
+}
+
+function uploadJsp() {
+curl -s -u "$cred" \
+    -T - "$left/html.jsp" > /dev/null 2>&1 <<HEREDOC
+<%@include file="/libs/foundation/global.jsp"%>
+<%@page import="com.day.cq.widget.HtmlLibraryManager"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>$path</title>
+    <%
+    final HtmlLibraryManager manager = sling.getService(HtmlLibraryManager.class);
+    if (manager != null) {
+        manager.writeCssInclude(slingRequest, out, "$category");
+        manager.writeJsInclude(slingRequest, out, "$category");
+    } else {
+        out.write("BAD");
+    }
+    %>
+</head>
+<body>
+    <h1>Sandbox $name</h1>
+</body>
+</html>
+HEREDOC
+}
+
+function createWidget() {
+curl -s -u "$cred" \
+    -F'jcr:primaryType=cq:ClientLibraryFolder' \
+    -F'sling:resourceType=widgets/clientlib' \
+    -F"categories=$category" \
+    -F'categories@TypeHint=String[]' \
+    -F'dependencies=cq.widgets' \
+    -F'dependencies@TypeHint=String[]' \
+    "$left/widgets" > /dev/null 2>&1
+}
+
+function uploadJsTxt() {
+curl -s -u "$cred" \
+    -T - "$left/widgets/js.txt" > /dev/null 2>&1 <<HEREDOC
+#base=source
+script.js
+HEREDOC
+}
+
+function createSource() {
+curl -s -u "$cred" \
+    -F'jcr:primaryType=nt:folder' \
+    "$left/widgets/source" > /dev/null 2>&1
+}
+
+function uploadJs() {
+curl -s -u "$cred" \
+    -T - "$left/widgets/source/script.js" > /dev/null 2>&1 <<HEREDOC
+CQ.Ext.onReady(function() {
+    //entry point
+    CQ.Ext.Msg.alert('Sandbox $name', 'Hello World!');
+});
+HEREDOC
+}
+
+echo -n "creating cq:Component $path... "
+createComponent || exit 1
+echo "DONE"
+
+echo -n "uploading html.jsp... "
+uploadJsp || exit 1
+echo "DONE"
+
+echo -n "creating widgets... "
+createWidget || exit 1
+echo "DONE"
+
+echo -n "uploading js.txt... "
+uploadJsTxt || exit 1
+echo "DONE"
+
+echo -n "creating source directory... "
+createSource || exit 1
+echo "DONE"
+
+echo -n "uploading script.js... "
+uploadJs || exit 1
+echo "DONE"
+
+echo "You may visit: $left.html"

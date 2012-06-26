@@ -1,0 +1,8 @@
+#!/bin/bash
+
+
+for script_path in "${PWD}/bin/"*
+do
+    script_name="${script_path##*/}"
+    ln -s "$script_path" "$HOME/bin/$script_name"
+done

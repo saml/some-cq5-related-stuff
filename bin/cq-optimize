@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if (( $# < 1))
+then
+    echo "Usage: $0 cq-home"
+    exit 1
+fi
+
+touch "$1/crx-quickstart/repository/workspaces/crx.default/optimize.tar"
+touch "$1/crx-quickstart/repository/version/optimize.tar"
+touch "$1/crx-quickstart/repository/tarJournal/optimize.tar"

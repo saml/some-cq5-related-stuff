@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if (( $# < 2 ))
+then
+    echo "usage: $0 path-to-replicate author-host:port [user:pass]"
+    echo "example, $0 /content/vulture/feed localhost:4502"
+    exit 1
+fi
+
+p="$1"
+h="$2"
+cred="admin:admin"
+if (( $# >= 3 ))
+then
+    cred="$3"
+fi
+
+curl -u "$cred" -F"_charset_=utf-8" -F"cmd=Activate" -F"path=$p" "http://$h/bin/replicate.json"

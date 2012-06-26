@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if (( $# < 2 ))
+then
+    echo "Usage: $0 file-path url [cred]"
+    echo "  uploads file-path to url"
+    echo "example, $0 ~/images/foo.jpg http://localhost:4502/content/dam/2010/12/foo.jpg admin:admin"
+    exit 1
+fi
+
+file_path="$1"
+url="$2"
+cred="admin:admin"
+if (( $# > 2 ))
+then
+    cred="$3"
+fi
+
+var_path="/var/${url#*/content/}"
+left="${url%%/content/*}"
+
+curl -u "$cred" -T "$file_path" -F "_charset_=utf-8" -F "$var_path@MoveFrom=/tmp/fileupload/file_$(date +%s)" "$left/tmp/fileupload"

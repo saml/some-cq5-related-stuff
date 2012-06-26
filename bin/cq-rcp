@@ -1,0 +1,35 @@
+#!/bin/bash
+
+if (( $# < 3 ))
+then
+    echo "usage: $0 src-path src-host dest-host [vlt rcp options]"
+    exit 1
+fi
+
+read -s -p "src-cred [default=admin:admin]: " cred1
+if [[ -z "$cred1" ]]
+then
+    cred1="admin:admin"
+fi
+
+echo ""
+
+read -s -p "dest-cred [default=admin:admin]: " cred2
+if [[ -z "$cred2" ]]
+then
+    cred2="admin:admin"
+fi
+
+echo ""
+
+path="$1"
+if [[ "$path" != /* ]]
+then
+    path="/$path"
+fi
+path1="$path"
+path2="$path"
+host1="$2"
+host2="$3"
+shift 3
+vlt rcp $* "http://$cred1@$host1/crx/-/jcr:root$path1" "http://$cred2@$host2/crx/-/jcr:root$path2" | grep -v "http://"

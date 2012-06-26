@@ -1,0 +1,29 @@
+#!/bin/bash
+
+host="localhost:4502"
+cred="admin:admin"
+
+if (( $# >= 1 ))
+then
+    host="$1"
+fi
+
+if (( $# >= 2 ))
+then
+    cred="$2"
+fi
+
+left="http://$host/tmp"
+
+curl -u "$cred" \
+    -F "jcr:primaryType=sling:Folder" -F 'jcr:primaryType@TypeHint=Name' \
+    -F "jcr:mixinTypes=rep:AccessControllable" -F 'jcr:mixinTypes@TypeHint=Name[]' \
+    "$left"
+
+curl -u "$cred" \
+    -F 'principalId=everyone' \
+    -F 'privilege@jcr:read=granted' \
+    -F 'privilege@jcr:write=granted' \
+    -F 'privilege@jcr:nodeTypeManagement=granted' \
+    "$left.modifyAce.html"
+

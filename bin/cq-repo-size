@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if (( $# < 1 ))
+then
+    echo "Usage: $0 cq-home"
+    exit 1
+fi
+
+repo="$1/crx-quickstart/repository"
+
+function f() {
+    #echo "$1"
+    du -lsh "$1"
+}
+
+f "$repo/workspaces"
+f "$repo/version"
+f "$repo/tarJournal"
+f "$repo/repository/index"
+date
