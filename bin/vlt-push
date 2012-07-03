@@ -1,0 +1,68 @@
+#!/bin/bash
+
+d="."
+if (( $# >= 1 ))
+then
+    d="$1"
+fi
+
+echo "$d"
+
+to_add=()
+to_rm=()
+to_ci=()
+
+while read -r l
+do
+    svn info "$d/$l" > /dev/null 2>&1 && to_add+=("$d/$l")
+done < <(vlt st "$d" | grep -e "^?" |cut -d'?' -f2)
+
+while read -r l
+do
+    st=$(vlt info "$d/$l" |grep 'Status:' |sed 's/Status: //')
+    if [[ "unknown" != "$st" ]]
+    then
+        to_rm+=("$d/$l")
+    fi
+done < <(svn st "$d" | grep -e "^?" |cut -d'?' -f2)
+
+while read -r l
+do
+    to_ci+=("$d/$l")
+done < <(vlt st "$d" | grep -e "^M" |cut -d' ' -f2)
+
+echo "will add these:"
+for x in "${to_add[@]}"
+do
+    echo "$x"
+done
+
+echo "will rm these:"
+for x in "${to_rm[@]}"
+do
+    echo "$x"
+done
+
+echo "will ci these:"
+for x in "${to_ci[@]}"
+do
+    echo "$x"
+done
+
+
+read -r -p "proceed? [Yn]> " proceed
+echo "$proceed"
+case "$proceed" in
+    [yY] | "")
+        echo "adding..."
+        vlt ci "${to_add[@]}"
+        echo "removing..."
+        vlt ci "${to_rm[@]}"
+        echo "checking in..."
+        vlt ci "${to_ci[@]}"
+        ;;
+    *)
+        echo "aborting..."
+        ;;
+esac
+
