@@ -40,21 +40,21 @@ case "$proceed" in
         if (( ${#to_add[@]} > 0 ))
         then
             echo "adding..."
-            echo vlt ci "${to_add[@]}"
-            vlt ci "${to_add[@]}"
+            echo "${to_add[@]}"
+            vlt add "${to_add[@]}" && vlt ci "${to_add[@]}"
         fi
 
         if (( ${#to_rm[@]} > 0 ))
         then
             echo "removing..."
-            echo vlt ci "${to_rm[@]}"
-            vlt ci "${to_rm[@]}"
+            echo "${to_rm[@]}"
+            vlt rm "${to_rm[@]}" && vlt ci "${to_rm[@]}"
         fi
 
         if (( ${#to_ci[@]} > 0 ))
         then
             echo "checking in..."
-            echo vlt ci "${to_ci[@]}"
+            echo "${to_ci[@]}"
             vlt ci "${to_ci[@]}"
         fi
         ;;
