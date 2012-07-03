@@ -18,7 +18,7 @@ done < <(vlt st "$d" | grep -e "^?" |cut -d'?' -f2)
 
 while read -r l
 do
-    st=$(vlt info "$d/$l" |grep 'Status:' |sed 's/Status: //')
+    st=$(vlt info "$d/$l" | sed -n '/Status: /{s///p;q}')
     if [[ "unknown" != "$st" ]]
     then
         to_rm+=("$d/$l")
@@ -30,52 +30,31 @@ do
     to_ci+=("$d/$l")
 done < <(vlt st "$d" | grep -e "^M" |cut -d' ' -f2)
 
-if (( ${#to_add[@]} > 0 ))
-then
-    echo "will add these:"
-    for x in "${to_add[@]}"
-    do 
-        echo "$x"
-    done
-fi
-
-if (( ${#to_rm[@]} > 0 ))
-then
-    echo "will rm these:"
-    for x in "${to_rm[@]}"
-    do 
-        echo "$x"
-    done
-fi
-
-if (( ${#to_ci[@]} > 0 ))
-then
-    echo "will ci these:"
-    for x in "${to_ci[@]}"
-    do 
-        echo "$x"
-    done
-fi
+(( ${#to_add[@]} > 0 )) && printf "%s\n" "will add these:" "${to_add[@]}"
+(( ${#to_rm[@]} > 0 )) && printf "%s\n" "will rm these:" "${to_rm[@]}"
+(( ${#to_ci[@]} > 0 )) && printf "%s\n" "will ci these:" "${to_ci[@]}"
 
 read -r -p "proceed? [Yn]> " proceed
-echo "$proceed"
 case "$proceed" in
     [yY] | "")
         if (( ${#to_add[@]} > 0 ))
         then
             echo "adding..."
+            echo vlt ci "${to_add[@]}"
             vlt ci "${to_add[@]}"
         fi
 
         if (( ${#to_rm[@]} > 0 ))
         then
             echo "removing..."
+            echo vlt ci "${to_rm[@]}"
             vlt ci "${to_rm[@]}"
         fi
 
         if (( ${#to_ci[@]} > 0 ))
         then
             echo "checking in..."
+            echo vlt ci "${to_ci[@]}"
             vlt ci "${to_ci[@]}"
         fi
         ;;
