@@ -6,11 +6,10 @@ then
     d="$1"
 fi
 
-echo "$d"
-
 to_add=()
 to_rm=()
 to_ci=()
+
 
 while read -r l
 do
@@ -31,35 +30,54 @@ do
     to_ci+=("$d/$l")
 done < <(vlt st "$d" | grep -e "^M" |cut -d' ' -f2)
 
-echo "will add these:"
-for x in "${to_add[@]}"
-do
-    echo "$x"
-done
+if (( ${#to_add[@]} > 0 ))
+then
+    echo "will add these:"
+    for x in "${to_add[@]}"
+    do 
+        echo "$x"
+    done
+fi
 
-echo "will rm these:"
-for x in "${to_rm[@]}"
-do
-    echo "$x"
-done
+if (( ${#to_rm[@]} > 0 ))
+then
+    echo "will rm these:"
+    for x in "${to_rm[@]}"
+    do 
+        echo "$x"
+    done
+fi
 
-echo "will ci these:"
-for x in "${to_ci[@]}"
-do
-    echo "$x"
-done
-
+if (( ${#to_ci[@]} > 0 ))
+then
+    echo "will ci these:"
+    for x in "${to_ci[@]}"
+    do 
+        echo "$x"
+    done
+fi
 
 read -r -p "proceed? [Yn]> " proceed
 echo "$proceed"
 case "$proceed" in
     [yY] | "")
-        echo "adding..."
-        vlt ci "${to_add[@]}"
-        echo "removing..."
-        vlt ci "${to_rm[@]}"
-        echo "checking in..."
-        vlt ci "${to_ci[@]}"
+        if (( ${#to_add[@]} > 0 ))
+        then
+            echo "adding..."
+            vlt ci "${to_add[@]}"
+        fi
+
+        if (( ${#to_rm[@]} > 0 ))
+        then
+            echo "removing..."
+            vlt ci "${to_rm[@]}"
+        fi
+
+        if (( ${#to_ci[@]} > 0 ))
+        then
+            echo "checking in..."
+            vlt ci "${to_ci[@]}"
+        fi
         ;;
     *)
         echo "aborting..."
