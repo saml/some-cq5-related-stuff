@@ -18,7 +18,7 @@ done < <(vlt st "$d" | grep -e "^?" |cut -d'?' -f2)
 
 while read -r l
 do
-    st=$(vlt info "$d/$l" | sed -n '/Status: /{s///p;q}')
+    st=$(vlt info "$d/$l" |grep 'Status:' |sed 's/Status: //')
     if [[ "unknown" != "$st" ]]
     then
         to_rm+=("$d/$l")
