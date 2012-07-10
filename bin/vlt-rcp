@@ -48,4 +48,5 @@ then
     path2="/$path2"
 fi
 
+echo "copying http://$host1$path1 -> http://$host2$path2"
 vlt rcp $* "http://$cred1@$host1/crx/-/jcr:root$path1" "http://$cred2@$host2/crx/-/jcr:root$path2" | grep -v "http://"
