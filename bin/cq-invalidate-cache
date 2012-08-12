@@ -11,7 +11,7 @@ shift 1
 for host in "$@"
 do
     echo "curl -H \"CQ-Handle: $p\" -H \"CQ-Path: $p\" http://$host/dispatcher/invalidate.cache"
-    curl -H "CQ-Handle: $p" -H "CQ-Path: $p" "http://$host/dispatcher/invalidate.cache"
+    curl -H "CQ-Action: Activate" -H "CQ-Handle: $p" -H "CQ-Path: $p" "http://$host/dispatcher/invalidate.cache"
 done
 
 

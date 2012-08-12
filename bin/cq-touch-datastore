@@ -1,0 +1,25 @@
+#!/bin/bash
+
+function cq_touch_datastore() {
+    local datastore="$1"
+    local bundleid="$2"
+    local datastore_dir="${datastore}/${bundleid:0:2}/${bundleid:2:2}/${bundleid:4:2}"
+    #echo "$datastore_dir/$bundleid"
+    mkdir -p "$datastore_dir"
+    touch "$datastore_dir/$bundleid"
+}
+
+if (( $# < 2 ))
+then
+    echo "Usage: $0 datastore-dir log-files"
+    exit 1
+fi
+
+datastore="$1"
+shift 1
+while read -r x
+do
+    cq_touch_datastore "$datastore" "$x"
+done < <(grep 'BLOBInDataStore: getSize for' "${@}" | awk '{print $8}' | sort | uniq)
+
+
