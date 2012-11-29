@@ -2,17 +2,19 @@
 
 if (( $# < 2 ))
 then
-    echo "usage: $0 path-to-replicate author-host:port [user:pass]"
+    echo "usage: $0 path-to-replicate author-host:port [username or cookiepath]"
     echo "example, $0 /content/vulture/feed localhost:4502"
     exit 1
 fi
 
 p="$1"
 h="$2"
-cred="admin:admin"
-if (( $# >= 3 ))
+username="${3:-admin}"
+cookie_path="$HOME/.cq5/$username@$h.cookie"
+
+if [[ -f "$username" ]]
 then
-    cred="$3"
+    cookie_path="$username"
 fi
 
-curl -u "$cred" -F"_charset_=utf-8" -F"cmd=Activate" -F"path=$p" "http://$h/bin/replicate.json"
+curl -b "$cookie_path" -F"_charset_=utf-8" -F"cmd=Activate" -F"path=$p" "http://$h/bin/replicate.json"

@@ -3,20 +3,16 @@
 
 if (( $# < 2 ))
 then
-    echo "Usage: $0 host:port repo-path"
+    echo "Usage: $0 host:port [repo-path]"
     echo "  CRX check repository datastore consistency"
     exit 1
 fi
 
 host="$1"
-repo_path="${2%/}"
-base_url="${1%/}"
-target_dir="${2%/}"
+repo_path="${2:-/}"
+repo_path="${repo_path%/}"
 
-
-#/home/sam/opt/cq/crx-quickstart/server/runtime/0/_crx/config/backup.jsp does mkdir
-#mkdir -p "$target_dir"
-
-shift 2
+cookie="$HOME"
+curl -c "$HOME/.cq5/$host"
 echo "curl $* $base_url/crx/config/backup.jsp?action=add&zipFileName=&targetDir=$target_dir"
 curl $* "$base_url/crx/config/backup.jsp?action=add&zipFileName=&targetDir=$target_dir"
